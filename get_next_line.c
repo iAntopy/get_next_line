@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/15 14:55:14 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/04/20 13:57:07 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/04/25 17:07:39 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ static void	scan_fd(t_gnldata *gd, int fd, ssize_t n_chrs)
 		if (gd->used_chks >= gd->max_chks)
 			realloc_double_chunks(gd);
 		idx = scan_nl(gd->rd_buff, n_chrs);
+		printf("scan nl result : %zu\n", idx);
 		if (mng_chnk_brk_check(gd, fd, n_chrs, idx))
 			break ;
 		else
@@ -100,6 +101,7 @@ char	*get_next_line(int fd)
 		gd.last_chks[fd] = NULL;
 		printf("fd last chunk recovered :  SUCCESS\n");
 		printf("recovered chunk : %s\n\n", gd.chunks[0]);
+		printf("recovered nbchars : %zu\n", gd.last_nchrs[fd]);
 		scan_fd(&gd, fd, gd.last_nchrs[fd]);
 		printf("fd recovered chunks scanned and malloced :  SUCCESS\n");
 	}

@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/14 21:29:08 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/04/18 21:55:51 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/04/25 17:07:10 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ typedef struct s_gnldata
 	int		used_chks;
 	char	*last_chks[MAX_FDS];
 	size_t	last_nchrs[MAX_FDS];
-	char	*rd_buff;
+	char	rd_buff[BUFFER_SIZE];
 }	t_gnldata;
 
 char	*get_next_line(int fd);
@@ -52,8 +52,8 @@ enum	err_codes
 
 enum	signal_codes
 {
-	SG_NO_NEWLINE = -0xfa00,
-	SG_EOF = -0xfa01
+	SG_NO_NEWLINE = -0xfa00UL,
+	SG_EOF = -0xfa01UL
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/15 14:32:39 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/04/18 21:43:44 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/04/25 17:08:00 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 int	init_gnldata(t_gnldata *gnld)
 {
 	gnld->chunks = (char **)malloc(sizeof(char *) * INIT_USBL_CHKS);
-	gnld->rd_buff = (char *)malloc(sizeof(char) * BUFFER_SIZE);
-	if (!gnld->chunks || !gnld->rd_buff)
+//	gnld->rd_buff = (char *)malloc(sizeof(char) * BUFFER_SIZE);
+	if (!gnld->chunks)
 		return (E_INIT_GNLD);
 	gnld->max_chks = INIT_USBL_CHKS;
 	gnld->used_chks = 0;
