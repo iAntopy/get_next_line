@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/14 21:29:08 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/02 18:01:00 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/04/25 17:07:10 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,30 +17,43 @@
 #  define BUFFER_SIZE 512
 # endif
 
-# define MAX_FDS 4096
-# define RD_IDX 4096
+# define MAX_FDS 1028
+# define INIT_USBL_CHKS 512
+
+# define TRUE 1
+# define FALSE 0
 
 #include <stdlib.h>
 #include <unistd.h>
 
+typedef struct s_gnldata
+{
+	int		is_init;
+	char	**chunks;
+	int		max_chks;
+	int		used_chks;
+	char	*last_chks[MAX_FDS];
+	size_t	last_nchrs[MAX_FDS];
+	char	rd_buff[BUFFER_SIZE];
+}	t_gnldata;
+
 char	*get_next_line(int fd);
-int		init_read_buffer(char **rems);
-int		manage_eof(char **rems, int fd);
-size_t	ft_strlen(const char *str);
-int		ft_strndup(char *str, size_t n, char **ret_ptr);
-int		strjoin_swap(char **s1, char *s2, size_t len1, size_t len2);
+int		init_gnldata(t_gnldata *gnld);
+int		realloc_double_chunks(t_gnldata *gnld);
+int		clear_used_chunks(t_gnldata *gnld);
+char	*ft_strndup(char *str, size_t n);
+char	*ft_strjoin(char **strs, size_t size);
 
 enum	err_codes
 {
-	E_MALLOC_ERR = -0xff00LL
+	E_INIT_GNLD = 0xff00,
+	E_REALLOC_CHUNKS = 0xff01
 };
 
 enum	signal_codes
 {
-	SG_NO_NEWLINE = -0xfa00LL,
-	SG_RETURN = -0xfa01LL,
-	SG_EOF = -0xfa02LL,
-	SG_LINE_COMPLET = -0xfa03LL
+	SG_NO_NEWLINE = -0xfa00UL,
+	SG_EOF = -0xfa01UL
 };
 
 #endif

@@ -1,126 +1,127 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line2.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/04/15 14:55:14 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/04/25 17:07:39 by iamongeo         ###   ########.fr       */
+/*   Created: 2022/04/25 17:26:05 by iamongeo          #+#    #+#             */
+/*   Updated: 2022/05/02 17:09:27 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+
+
 #include <stdio.h>
-/*
-static void	ft_strcpy(char *dst, char *src, size_t n_chrs)
-{
-	while (n_chrs--)
-		*(dst++) = *(src++);
-}
-*/
-static ssize_t	scan_nl(char *rd_buff, ssize_t n_chrs)
-{
-	ssize_t	i;
 
-	i = -1;
-	while (rd_buff[++i] && (i < n_chrs))
-		if (rd_buff[i] == '\n')
-			return (i + 1);
-	return (SG_NO_NEWLINE);
-}
 
-static int	mng_chnk_brk_check(t_gnldata *gd, int fd, ssize_t n_chrs, size_t idx)
+static int	scan_nl(char *buff, size_t *ret_idx)
 {
-	if (idx == SG_NO_NEWLINE)
+	*ret_idx = 0;
+	while (*buff)
 	{
-		gd->chunks[gd->used_chks++] = ft_strndup(gd->rd_buff, n_chrs);
-		if (gd->chunks[gd->used_chks - 1])
-			printf("chunk manager : ft_strndup SUCCESS\n");
-		else
-			printf("chunk manager : ft_strndup FAILURE\n");
-		if (n_chrs != BUFFER_SIZE)
-		{
-			gd->last_nchrs[fd] = (size_t)SG_EOF;
+		(*ret_idx)++;
+		if (*buff == '\n')
 			return (1);
-		}
-		return (0);
+		buff++;
+	}
+	return (0);
+}
+
+static ssize_t	scan_rem(char **rem, char **line, ssize_t *cur_len)
+{
+	size_t	idx;
+	char	*temp_rem;
+	size_t	len;	
+
+	temp_rem = *rem;
+	*rem = NULL;
+	if (!scan_nl(temp_rem, &idx))
+	{
+		*line = temp_rem;
+		idx = SG_RETURN;
 	}
 	else
 	{
-		printf("\'\\n\' found at index : %zu\n", idx);
-		gd->chunks[gd->used_chks++] = ft_strndup(gd->rd_buff, idx);
-		if (gd->chunks[gd->used_chks - 1])
-			printf("chunk manager : ft_strndup SUCCESS\n");
-		else
-			printf("chunk manager : ft_strndup FAILURE\n");
-		gd->last_nchrs[fd] = n_chrs - idx;
-		if (gd->last_nchrs[fd])
-			gd->last_chks[fd] = ft_strndup(gd->rd_buff + idx, n_chrs - idx);
-		return (1);
+		len = ft_strlen(temp_rem) - idx;
+		if (!ft_strndup(temp_rem, idx, line) || !ft_strndup(temp_rem + idx, len, rem))
+			return (E_MALLOC_ERR);
+		free(temp_rem);
 	}
+	*cur_len = idx;
+	return (idx);
 }
 
-static void	scan_fd(t_gnldata *gd, int fd, ssize_t n_chrs)
+static ssize_t	scan_fd(char **rems, int fd, char **line, ssize_t *cur_len)
 {
 	size_t	idx;
+	ssize_t	n_chrs;
+	int		nl_found;
 
-	while (n_chrs)
+	while (1)
 	{
-		if (gd->used_chks >= gd->max_chks)
-			realloc_double_chunks(gd);
-		idx = scan_nl(gd->rd_buff, n_chrs);
-		printf("scan nl result : %zu\n", idx);
-		if (mng_chnk_brk_check(gd, fd, n_chrs, idx))
-			break ;
+		printf("while loop pass!\n");
+		n_chrs = read(fd, rems[RD_IDX], BUFFER_SIZE);
+		if (!n_chrs)
+		{
+			printf("EOF ALLERT !\n");
+			return (manage_eof(rems, fd));
+		}
+		nl_found = scan_nl(rems[RD_IDX], &idx);
+		if (!strjoin_swap(line, rems[RD_IDX], *cur_len, idx))
+		{
+			printf("ERROR : str_join failed!\n");
+			return (0);
+//			return (E_MALLOC_ERR);
+		}
+		printf("joined line : %s\n", *line);
+		*cur_len += idx;
+		if (nl_found)
+		{
+			printf("nl found at idx %zu, cur_len %zd\n", idx, *cur_len);
+			if (!ft_strndup(&rems[RD_IDX][idx], n_chrs - idx, &rems[fd]))
+			{
+				printf("ERROR : strdup failed!");
+				return (0);
+//				return (E_MALLOC_ERR);
+			}
+			return (1);
+		}
 		else
-			n_chrs = read(fd, gd->rd_buff, BUFFER_SIZE);
+			rems[fd] = NULL;
 	}
+	printf("ERROR : unexpected while loop break");
 }
 
 char	*get_next_line(int fd)
 {
-	static t_gnldata	gd;
-	char				*line;
+	static char	*rems[MAX_FDS];
+	char		*line;
+	ssize_t		cur_len;
 
 	line = NULL;
-	if (!gd.is_init)
-		if (init_gnldata(&gd) == E_INIT_GNLD)
-			return (NULL);
-	printf("gdnl initialized : SUCCESS\n");
-	if (gd.last_nchrs[fd] == (size_t)SG_EOF)
+	cur_len = 0;
+	if (fd < 0 || MAX_FDS <= fd || BUFFER_SIZE <= 0 || rems[fd] == (char *)SG_EOF)
+	{
+		printf("Returned NULL bc -- fd < 0 : %d, MAX_FDS <= fd : %d, BUFFER_SIZE <= 0 : %d, rems[fd] == SG_EOF : %d\n", fd < 0, MAX_FDS <= fd, BUFFER_SIZE <= 0, rems[fd] == (char *)SG_EOF);
 		return (NULL);
-
-	gd.used_chks = 0;
-	printf("fd last nchrs not EOF :  SUCCESS\n");
-	if (gd.last_chks[fd])
-	{
-		gd.chunks[gd.used_chks++] = gd.last_chks[fd];
-		//ft_strcpy(gd.rd_buff, gd.last_chks[fd], gd.last_nchrs[fd]);
-		//free(gd.last_chks[fd]);
-		gd.last_chks[fd] = NULL;
-		printf("fd last chunk recovered :  SUCCESS\n");
-		printf("recovered chunk : %s\n\n", gd.chunks[0]);
-		printf("recovered nbchars : %zu\n", gd.last_nchrs[fd]);
-		scan_fd(&gd, fd, gd.last_nchrs[fd]);
-		printf("fd recovered chunks scanned and malloced :  SUCCESS\n");
 	}
-	else
+	if (!rems[RD_IDX] && !init_read_buffer(rems))
 	{
-		scan_fd(&gd, fd, read(fd, gd.rd_buff, BUFFER_SIZE));
-		printf("new fd\'s chunks scanned and malloced :  SUCCESS\n");
+		printf("Returned NULL bc -- !rems[RD_IDX] : %d, init read failed : %d\n",  !rems[RD_IDX], 0);
+		return (NULL);
 	}
-	if (gd.used_chks)
+	if (rems[fd] && scan_rem(&rems[fd], &line, &cur_len) == SG_RETURN)
 	{
-		if (gd.used_chks == 1)
-			line = gd.chunks[0];
-		else
-		{
-			line = ft_strjoin(gd.chunks, gd.used_chks);
-			clear_used_chunks(&gd);
-			printf("chunks cleared :  SUCCESS\n");
-		}
+		printf("Returned NULL bc -- rems[fd] doesn't exists or scan rem failed. ");
+		return (line);
 	}
-	printf("line joined %d chunks :  SUCCESS\n", gd.used_chks);
+	if (!rems[fd] && !scan_fd(rems, fd, &line, &cur_len))
+	{
+		printf("Returned NULL bc -- no rems[fd] or scan_fd failed.");
+		return (NULL);
+	}
+	printf("EXIT fd %d\n", fd);
 	return (line);
 }
