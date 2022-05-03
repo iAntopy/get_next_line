@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/14 21:29:08 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/02 20:36:15 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/03 17:02:56 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@ int		strjoin_swap(char **s1, char *s2, size_t len1, size_t len2);
 
 enum	err_codes
 {
-	E_MALLOC_ERR = -0xff00LL
+	E_MALLOC_ERR = -0xff00LL,
+	E_INVALID_FD = -0xff01LL
 };
 
 enum	signal_codes

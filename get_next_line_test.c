@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 17:04:29 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/03 16:20:22 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/03 18:46:57 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,14 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
+#include "get_next_line.h"
 
 char	*get_next_line(int fd);
 
 const char	file1[] = "demo_files/ex1.txt";
 const char	file2[] = "demo_files/ex2.txt";
-const char	file3[] = "demo_files/nlx3.txt";
+const char	file3[] = "demo_files/files/43_no_nl";
 
 static int	callsCounter[100];
 
@@ -45,11 +47,15 @@ void	testCall(int fd)
 {
 	char	*line;
 
-	printf("\n\n<|--------------fd %d LINE %d-------------|>", fd - 2, ++callsCounter[fd]);
-	fclose(stdout);
+	if (fd < 100)
+		printf("\n\n<|--------------fd %d LINE %d-------------|>\n", fd, ++callsCounter[fd]);
+	else
+		printf("\n\n<|--------------fd %d -------------|>\n", fd);
 	line = get_next_line(fd);
-	fopen(stdout);
-	printf("\n<|--------------fd %d LINE %d-------------|>\n", fd - 2, callsCounter[fd]);
+	if (fd < 100)
+		printf("\n\n<|--------------fd %d LINE %d-------------|>\n", fd, callsCounter[fd]);
+	else
+		printf("\n\n<|--------------fd %d -------------|>\n", fd);
 	printnl(line);
 	free(line);
 }
@@ -70,6 +76,12 @@ int	main(void)
 	}
 	printf("TEST START !\n");
 
+	printf("Invalid fds tests: \n");
+	testCall(-1);
+	testCall(10);
+	testCall(INT_MAX);
+	
+	printf("\nStart valid tests : \n");
 	testCall(fd1);
 	testCall(fd2);
 	testCall(fd1);
@@ -80,6 +92,7 @@ int	main(void)
 	testCall(fd2);
 	testCall(fd1);
 	testCall(fd2);
+	testCall(0);
 	testCall(fd3);
 	testCall(fd1);
 	testCall(fd3);

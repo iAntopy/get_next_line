@@ -6,12 +6,12 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/02 17:27:01 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/03 16:35:15 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/03 15:56:16 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-//#include <stdio.h>
+#include <stdio.h>
 
 size_t	ft_strlen(const char *str)
 {
@@ -27,7 +27,7 @@ int	init_read_buffer(char *rems[])
 {
 	char	*rd_buff;
 
-//	printf("Initializing read buffer !\n");
+	printf("Initializing read buffer !\n");
 	if (rems[RD_IDX])
 		return (1);
 	rd_buff = (char *)malloc(sizeof(char) * BUFFER_SIZE);
@@ -41,18 +41,18 @@ int	manage_eof(char **rems, int fd)
 {
 	int	i;
 
-//	printf("Managing EOF\n");
+	printf("Managing EOF\n");
 	if (rems[fd] && rems[fd] != (char *)SG_EOF)
 		free(rems[fd]);
 	rems[fd] = (char *)SG_EOF;
-//	printf("rems[fd] set to SG_EOF : %p\n", rems[fd]);
+	printf("rems[fd] set to SG_EOF : %p\n", rems[fd]);
 	if (!rems[RD_IDX])
 		return (SG_EOF);
 	i = -1;
 	while (++i < MAX_FDS)
 		if (rems[i] && rems[i] != (char *)SG_EOF)
 			return (SG_EOF);
-//	printf("\nFreeing read buffer at ptr %p\n", rems[RD_IDX]);
+	printf("\nFreeing read buffer at ptr %p\n", rems[RD_IDX]);
 	free(rems[RD_IDX]);
 	rems[RD_IDX] = NULL;
 	return (SG_EOF);
