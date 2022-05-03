@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 17:04:29 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/04/29 20:02:21 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/03 16:20:22 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,37 @@ char	*get_next_line(int fd);
 
 const char	file1[] = "demo_files/ex1.txt";
 const char	file2[] = "demo_files/ex2.txt";
-const char	file3[] = "demo_files/ex3.txt";
+const char	file3[] = "demo_files/nlx3.txt";
+
+static int	callsCounter[100];
 
 void	printnl(char *str)
 {
-	while (*str)
+	if (!str)
+		printf("(null)\n");
+	else
 	{
-		if (*str == '\n')
-			write(1, "$", 2);
-		write(1, str++, 1);
+		while (*str)
+		{
+			if (*str == '\n')
+				write(1, "$", 2);
+			write(1, str++, 1);
+		}
+		write(1, ">", 1);
 	}
+}
+
+void	testCall(int fd)
+{
+	char	*line;
+
+	printf("\n\n<|--------------fd %d LINE %d-------------|>", fd - 2, ++callsCounter[fd]);
+	fclose(stdout);
+	line = get_next_line(fd);
+	fopen(stdout);
+	printf("\n<|--------------fd %d LINE %d-------------|>\n", fd - 2, callsCounter[fd]);
+	printnl(line);
+	free(line);
 }
 
 int	main(void)
@@ -38,8 +59,6 @@ int	main(void)
 	int	fd1;
 	int	fd2;
 	int	fd3;
-
-	char	*line;   
 
 	fd1 = open(file1, O_RDONLY);
 	fd2 = open(file2, O_RDONLY);
@@ -50,75 +69,25 @@ int	main(void)
 		return (errno);
 	}
 	printf("TEST START !\n");
-	line = get_next_line(fd1);
-	printf("\n\n<|--------------fd 1 LINE 1-------------|>\n");
-//	printnl(line);
-	printf("%s", line);
-	free(line);
-/*
-	line = get_next_line(fd2);
-	printf("\n\n<|--------------fd 2 LINE 1-------------|>\n");
-	printnl(line);
-	free(line);
 
-	line = get_next_line(fd1);
-	printf("\n\n<|--------------fd 1 LINE 2-------------|>\n");
-	printnl(line);
-	free(line);
+	testCall(fd1);
+	testCall(fd2);
+	testCall(fd1);
+	testCall(fd2);
+	testCall(fd1);
+	testCall(fd2);
+	testCall(fd1);
+	testCall(fd2);
+	testCall(fd1);
+	testCall(fd2);
+	testCall(fd3);
+	testCall(fd1);
+	testCall(fd3);
+	testCall(fd3);
+	testCall(fd3);
+	testCall(fd3);
 
-	line = get_next_line(fd2);
-	printf("\n\n<|--------------fd 2 LINE 2-------------|>\n");
-	printnl(line);
-	free(line);
-
-	line = get_next_line(fd3);
-	printf("\n\n<|--------------fd 3 LINE 1-------------|>\n");
-	printnl(line);
-	free(line);
-
-	line = get_next_line(fd1);
-	printf("\n\n<|--------------fd 1 LINE 3-------------|>\n");
-	printnl(line);
-	free(line);
-
-	line = get_next_line(fd2);
-	printf("\n\n<|--------------fd 2 LINE 3-------------|>\n");
-	printnl(line);
-	free(line);
-
-	line = get_next_line(fd3);
-	printf("\n\n<|--------------fd 3 LINE 2-------------|>\n");
-	printnl(line);
-	free(line);
-
-	line = get_next_line(fd1);
-	printf("\n\n<|--------------fd 1 LINE 4-------------|>\n");
-	printnl(line);
-	if (line)
-		free(line);
-	
-	line = get_next_line(fd2);
-	printf("\n\n<|--------------fd 2 LINE 4-------------|>\n");
-	printnl(line);
-	if (line)
-		free(line);
-
-	line = get_next_line(fd3);
-	printf("\n\n<|--------------fd 3 LINE 3-------------|>\n");
-	printnl(line);
-	free(line);
-
-	line = get_next_line(fd1);
-	printf("\n\n<|--------------fd 1 LINE 5-------------|>\n");
-	printnl(line);
-	if (line)
-		free(line);
-
-	line = get_next_line(fd1);
-	printf("\n\n<|--------------fd 2 LINE 5-------------|>\n");
-	if (line)
-		free(line);
-*/
+	printf("TEST OVER ! \n");
 	close(fd1);
 	close(fd2);
 	close(fd3);

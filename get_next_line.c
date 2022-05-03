@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/25 17:26:05 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/02 17:09:27 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/03 16:28:51 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,28 +29,38 @@ static int	scan_nl(char *buff, size_t *ret_idx)
 	return (0);
 }
 
-static ssize_t	scan_rem(char **rem, char **line, ssize_t *cur_len)
+static int	scan_rem(char **rems, int fd, char **line, ssize_t *cur_len)
 {
 	size_t	idx;
 	char	*temp_rem;
-	size_t	len;	
+	size_t	len;
 
-	temp_rem = *rem;
-	*rem = NULL;
-	if (!scan_nl(temp_rem, &idx))
+	temp_rem = rems[fd];
+	if (!temp_rem)
 	{
-		*line = temp_rem;
-		idx = SG_RETURN;
+		printf("no rem to recover from rems[fd]\n");
+		return (SG_CONTINUE);
+	}
+	printf("recovered rem from rems[fd] : %s\n", temp_rem);
+	rems[fd] = NULL;
+	len = ft_strlen(temp_rem);
+	if (scan_nl(temp_rem, &idx))
+	{
+		printf("nl found in rem at idx %zu\n", idx);
+		*cur_len = idx;
+		len = len - idx;
+		if (!ft_strndup(temp_rem, idx, line) || !ft_strndup(temp_rem + idx, len, &rems[fd]))
+			return (E_MALLOC_ERR);
+		free(temp_rem);
+		return (SG_RETURN);
 	}
 	else
 	{
-		len = ft_strlen(temp_rem) - idx;
-		if (!ft_strndup(temp_rem, idx, line) || !ft_strndup(temp_rem + idx, len, rem))
-			return (E_MALLOC_ERR);
-		free(temp_rem);
+		printf("no nl found in rem. rem becomes line.\n");
+		*line = temp_rem;
+		*cur_len = len;
+		return (SG_CONTINUE);
 	}
-	*cur_len = idx;
-	return (idx);
 }
 
 static ssize_t	scan_fd(char **rems, int fd, char **line, ssize_t *cur_len)
@@ -65,15 +75,15 @@ static ssize_t	scan_fd(char **rems, int fd, char **line, ssize_t *cur_len)
 		n_chrs = read(fd, rems[RD_IDX], BUFFER_SIZE);
 		if (!n_chrs)
 		{
-			printf("EOF ALLERT !\n");
+			printf("EOF ALERT !\n");
 			return (manage_eof(rems, fd));
 		}
 		nl_found = scan_nl(rems[RD_IDX], &idx);
+		printf("nl found ? %s, idx found : %zu\n", (nl_found) ? "TRUE":"FALSE", idx);
 		if (!strjoin_swap(line, rems[RD_IDX], *cur_len, idx))
 		{
 			printf("ERROR : str_join failed!\n");
-			return (0);
-//			return (E_MALLOC_ERR);
+			return (E_MALLOC_ERR);
 		}
 		printf("joined line : %s\n", *line);
 		*cur_len += idx;
@@ -83,25 +93,29 @@ static ssize_t	scan_fd(char **rems, int fd, char **line, ssize_t *cur_len)
 			if (!ft_strndup(&rems[RD_IDX][idx], n_chrs - idx, &rems[fd]))
 			{
 				printf("ERROR : strdup failed!");
-				return (0);
-//				return (E_MALLOC_ERR);
+				return (E_MALLOC_ERR);
 			}
-			return (1);
+			return (SG_RETURN);
 		}
 		else
 			rems[fd] = NULL;
 	}
-	printf("ERROR : unexpected while loop break");
 }
 
 char	*get_next_line(int fd)
 {
-	static char	*rems[MAX_FDS];
+	static char	*rems[MAX_FDS + 1];
 	char		*line;
 	ssize_t		cur_len;
+	ssize_t		status;
 
+	printf("\n\nNew get_next_line call on fd %d\n", fd);
 	line = NULL;
 	cur_len = 0;
+	printf("rems[fd] : %p vs (char *)SG_EOF : %p\n", rems[fd], (char *)SG_EOF);
+	printf("rems[RD_IDX] ptr : %p\n", rems[RD_IDX]);
+	if (rems[fd] == (char *)SG_EOF)
+		printf("rems[fd] ptr == SG_EOF\n");
 	if (fd < 0 || MAX_FDS <= fd || BUFFER_SIZE <= 0 || rems[fd] == (char *)SG_EOF)
 	{
 		printf("Returned NULL bc -- fd < 0 : %d, MAX_FDS <= fd : %d, BUFFER_SIZE <= 0 : %d, rems[fd] == SG_EOF : %d\n", fd < 0, MAX_FDS <= fd, BUFFER_SIZE <= 0, rems[fd] == (char *)SG_EOF);
@@ -112,14 +126,24 @@ char	*get_next_line(int fd)
 		printf("Returned NULL bc -- !rems[RD_IDX] : %d, init read failed : %d\n",  !rems[RD_IDX], 0);
 		return (NULL);
 	}
-	if (rems[fd] && scan_rem(&rems[fd], &line, &cur_len) == SG_RETURN)
-	{
-		printf("Returned NULL bc -- rems[fd] doesn't exists or scan rem failed. ");
+	status = scan_rem(rems, fd, &line, &cur_len);
+//	if (rems[fd] && scan_rem(&rems[fd], &line, &cur_len) == SG_RETURN)
+	if (status == SG_RETURN)
 		return (line);
-	}
-	if (!rems[fd] && !scan_fd(rems, fd, &line, &cur_len))
+	else if (status == E_MALLOC_ERR)
+		return (NULL);
+//	printf("is rems[fd] NULL ? %s\n", (!rems[fd]) ? "TRUE":"FALSE");
+//	if (!rems[fd] || !scan_fd(rems, fd, &line, &cur_len))
+	status = scan_fd(rems, fd, &line, &cur_len);
+	if (!rems[RD_IDX])
+		printf("\n[][]~[]~[]~~[]~~~[]~READ~BUFFER~CLEARED~[]~~~[]~~[]~[]~[][]\n");
+
+	if (status == E_MALLOC_ERR || status == SG_EOF)
 	{
-		printf("Returned NULL bc -- no rems[fd] or scan_fd failed.");
+		if (status == SG_EOF)
+			printf("fd %d reached EOF\n", fd);
+		else if (status == E_MALLOC_ERR)
+			printf("scan_rem failed with malloc error.\n");
 		return (NULL);
 	}
 	printf("EXIT fd %d\n", fd);

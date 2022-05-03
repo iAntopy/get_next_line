@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/14 21:29:08 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/02 18:01:00 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/02 20:36:15 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ enum	signal_codes
 	SG_NO_NEWLINE = -0xfa00LL,
 	SG_RETURN = -0xfa01LL,
 	SG_EOF = -0xfa02LL,
-	SG_LINE_COMPLET = -0xfa03LL
+	SG_CONTINUE = - 0xfa03LL
 };
 
 #endif
