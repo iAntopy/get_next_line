@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:15:10 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/05 18:41:54 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/05 22:54:51 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #include <stdio.h>
 
-int	malloc_ptr(size_t size, void **ret_ptr)
+int	malloc_p(size_t size, void **ret_ptr)
 {
 	printf("malloc ing size : %zu\n", size);
 	*ret_ptr = malloc(size);
@@ -28,11 +28,13 @@ int	ft_substr(const char *str, size_t start, size_t n, char **ret)
 	size_t	len;
 	char	*r;
 
+	if (!str)
+		return (0);
 	str += start;
 	len = 0;
 	while (str[len] && len < n)
 		len++;
-	if (!malloc_ptr(sizeof(char) * (len + 1), (void **)ret))
+	if (!malloc_p(sizeof(char) * (len + 1), (void **)ret))
 		return (0);
 	r = *ret;
 	while (*str && n--)
@@ -41,19 +43,27 @@ int	ft_substr(const char *str, size_t start, size_t n, char **ret)
 	return (1);
 }
 
-int	dlst_push_new_substr(t_dlst **dlst, const char *str, size_t start, size_t len)
+int	dlst_push_substr(t_dlst **dlst, const char *str, size_t start, size_t len)
 {
 	t_dlst	*elem;
-	char	*s;
 
-	if (!malloc_ptr(sizeof(t_dlst), (void **)&elem))
+	if (!malloc_p(sizeof(t_dlst), (void **)&elem))
 		return (0);
-	if (!ft_substr(str, start, len, &elem->str))
+	elem->str = NULL;
+	if (!str && len > 0 && !malloc_p(sizeof(char) * len, (void **)&(elem->str)))
+		return (0);
+	else if (str && !ft_substr(str, start, len, &elem->str))
 		return (0);
 	elem->prev = NULL;
 	elem->next = NULL;
-	elem->len = len;
-	if (*dlst)
+	elem->n = len;
+	if (start == FT_SIZE_MAX)
+	{
+		elem->prev = *dlst;
+		(*dlst)->next = elem;
+		return (1);
+	}
+	else if (*dlst)
 	{
 		(*dlst)->prev = elem;
 		elem->next = *dlst;
@@ -97,13 +107,13 @@ int	gather_line(t_dlst *dlst, char **ret_line)
 		free(elem);
 		return (1);
 	}
-	total_len = elem->len;
+	total_len = elem->n;
 	while (elem->next)
 	{
 		elem = elem->next;
-		total_len += elem->len;
+		total_len += elem->n;
 	}
-	if (!malloc_ptr(sizeof(char) * (total_len + 1), (void **)ret_line))
+	if (!malloc_p(sizeof(char) * (total_len + 1), (void **)ret_line))
 		return (0);
 	join_chunks_list(*ret_line, elem);
 	return (1);
