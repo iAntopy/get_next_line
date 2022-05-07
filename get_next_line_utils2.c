@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:15:10 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/05 22:54:51 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/06 21:14:59 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,68 +43,78 @@ int	ft_substr(const char *str, size_t start, size_t n, char **ret)
 	return (1);
 }
 
-int	dlst_push_substr(t_dlst **dlst, const char *str, size_t start, size_t len)
+int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *mstr, int push_app)
 {
-	t_dlst	*elem;
-
-	if (!malloc_p(sizeof(t_dlst), (void **)&elem))
-		return (0);
-	elem->str = NULL;
-	if (!str && len > 0 && !malloc_p(sizeof(char) * len, (void **)&(elem->str)))
-		return (0);
-	else if (str && !ft_substr(str, start, len, &elem->str))
-		return (0);
-	elem->prev = NULL;
-	elem->next = NULL;
-	elem->n = len;
-	if (start == FT_SIZE_MAX)
+	if ((push_app != 2 && !mstr) || !malloc_p(sizeof(t_dlst), (void **)elem))
 	{
-		elem->prev = *dlst;
-		(*dlst)->next = elem;
-		return (1);
+		free(mstr);
+		return (0);
 	}
-	else if (*dlst)
+	(*elem)->prev = NULL;
+	(*elem)->next = NULL;
+	(*elem)->str = mstr;
+	if (push_app == 1) //push element before *dlst
 	{
-		(*dlst)->prev = elem;
-		elem->next = *dlst;
+		if ((*dlst)->prev)
+			(*dlst)->prev->next = *elem;
+		(*elem)->prev = (*dlst)->prev;
+		(*dlst)->prev = *elem;
+		(*elem)->next = *dlst;
 	}
-	*dlst = elem;
+	else if (push_app == 2) //append element after *dlst
+	{
+		if ((*dlst)->next)
+			(*dlst)->next->prev = *elem;
+		(*elem)->next = (*dlst)->next;
+		(*dlst)->next = *elem;
+		(*elem)->prev = (*dlst);
+	}
 	return (1);
 }
 
-static void	join_chunks_list(char *line, t_dlst *elem)
+static int	join_clear_list(char *line, t_dlst **elem, int do_join)
 {
 	char	*s;
 
+	if (!(*elem))
+		return (do_join);
+	while ((*elem)->next)
+		*elem = (*elem)->next;
 	while (1)
 	{
-		s = elem->str;
-		while (*s)
-			*(line++) = *(s++);
-		free(elem->str);
-		if (elem->prev)
+		s = (*elem)->str;
+		if (do_join)
+			while (*s)
+				*(line++) = *(s++);
+		free((*elem)->str);
+		if ((*elem)->prev)
 		{
-			elem = elem->prev;
-			free(elem->next);
+			*elem = (*elem)->prev;
+			free((*elem)->next);
 		}
 		else
 			break ;
 	}
-	free(elem);
+	free(*elem);
+	*elem = NULL;
+	return (do_join);
 }
 
-int	gather_line(t_dlst *dlst, char **ret_line)
-{
-	t_dlst	*elem;
-	size_t	total_len;
 
-	elem = dlst;
+
+int	gather_line(t_dlst **chks, char **ret_line)
+{
+	size_t	total_len;
+	t_dlst	*elem;
+
+	elem = *chks;	
 	if (!elem)
 		return (0);
 	if (!(elem->next))
 	{
 		*ret_line = elem->str;
 		free(elem);
+		*chks = NULL;
 		return (1);
 	}
 	total_len = elem->n;
@@ -114,7 +124,9 @@ int	gather_line(t_dlst *dlst, char **ret_line)
 		total_len += elem->n;
 	}
 	if (!malloc_p(sizeof(char) * (total_len + 1), (void **)ret_line))
-		return (0);
-	join_chunks_list(*ret_line, elem);
-	return (1);
+	{
+		*n_chrs = -2;
+		return (join_clear_list(NULL, &chks, 0));
+	}
+	return (join_clear_list(*ret_line, &elem, 1));
 }
