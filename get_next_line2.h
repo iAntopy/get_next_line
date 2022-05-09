@@ -17,10 +17,6 @@
 #  define BUFFER_SIZE 512
 # endif
 
-# define MAX_FDS 65535
-# define RD_IDX MAX_FDS
-# define FT_SIZE_MAX 0ULL - 1
-
 # include <stdlib.h>
 # include <unistd.h>
 
@@ -34,7 +30,14 @@ typedef struct s_dlst
 
 int	malloc_ptr(size_t n, void **ret_ptr);
 int	ft_substr(const char *str, size_t start, size_t n, char **ret);
-int	dlst_push_substr(t_dlst **dlst, const char *str, size_t start, size_t len);
-int	gather_line(t_dlst *dlst, char **ret_line);
+int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *mstr, int push_app);
+int join_clear_list(char *line, t_dlst **elem, int do_join);
+int	gather_line(t_dlst **chks, char **ret_line, size_t *n_chrs);
+
+enum	e_fail_codes
+{
+	E_MLC = 0ULL - 2,
+	E_IFD = 0ULL - 1
+};
 
 #endif

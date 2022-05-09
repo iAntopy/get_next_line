@@ -17,13 +17,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "get_next_line.h"
+#if __has_include("get_next_line.h")
+# include "get_next_line.h"
+#else
+# include "get_next_line2.h"
+#endif
 
 char	*get_next_line(int fd);
 
 const char	file1[] = "demo_files/ex1.txt";
 const char	file2[] = "demo_files/ex2.txt";
-const char	file3[] = "demo_files/files/43_no_nl";
+const char	file3[] = "demo_files/ex3.txt";
 
 static int	callsCounter[100];
 

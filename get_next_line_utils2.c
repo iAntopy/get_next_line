@@ -25,35 +25,44 @@ int	malloc_p(size_t size, void **ret_ptr)
 
 int	ft_substr(const char *str, size_t start, size_t n, char **ret)
 {
-	size_t	len;
+	//size_t	len;
 	char	*r;
+	printf("Substr : substringing starts\n");
 
 	if (!str)
 		return (0);
+	printf("Substr : str ptr present \n");
 	str += start;
-	len = 0;
-	while (str[len] && len < n)
-		len++;
-	if (!malloc_p(sizeof(char) * (len + 1), (void **)ret))
+	printf("Substr : Pre malloc_p\n");
+	if (!malloc_p(sizeof(char) * (n + 1), (void **)ret))
 		return (0);
 	r = *ret;
-	while (*str && n--)
+	printf("Substr : Entering while copy\n");
+	while (n--)
 		*(r++) = *(str++);
 	*r = '\0';
+	printf("Substr : string null terminated and closing.\n");
 	return (1);
 }
 
 int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *mstr, int push_app)
 {
+	printf("dlst insert : starting insertion, push_app : %d\n", push_app);
+	printf("dlst insert : ptrs elem %p\n", *elem);
 	if ((push_app != 2 && !mstr) || !malloc_p(sizeof(t_dlst), (void **)elem))
 	{
+		printf("dlst insert : trying to free mstr\n");
 		free(mstr);
 		return (0);
 	}
+	printf("dlst insert : linking new elem \n");
 	(*elem)->prev = NULL;
 	(*elem)->next = NULL;
 	(*elem)->str = mstr;
-	if (push_app == 1) //push element before *dlst
+	printf("dlst insert : elem initialized\n");
+	if (dlst && !(*dlst))
+		*dlst = *elem;
+	else if (dlst && push_app == 1) //push element before *dlst
 	{
 		if ((*dlst)->prev)
 			(*dlst)->prev->next = *elem;
@@ -61,7 +70,7 @@ int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *mstr, int push_app)
 		(*dlst)->prev = *elem;
 		(*elem)->next = *dlst;
 	}
-	else if (push_app == 2) //append element after *dlst
+	else if (dlst && push_app == 2) //append element after *dlst
 	{
 		if ((*dlst)->next)
 			(*dlst)->next->prev = *elem;
@@ -69,10 +78,11 @@ int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *mstr, int push_app)
 		(*dlst)->next = *elem;
 		(*elem)->prev = (*dlst);
 	}
+	printf("insert : elem prev, elem next : %p, %p\n", (*elem)->prev, (*elem)->next);
 	return (1);
 }
 
-static int	join_clear_list(char *line, t_dlst **elem, int do_join)
+int	join_clear_list(char *line, t_dlst **elem, int do_join)
 {
 	char	*s;
 
@@ -83,7 +93,7 @@ static int	join_clear_list(char *line, t_dlst **elem, int do_join)
 	while (1)
 	{
 		s = (*elem)->str;
-		if (do_join)
+		if (do_join && s)
 			while (*s)
 				*(line++) = *(s++);
 		free((*elem)->str);
@@ -100,9 +110,7 @@ static int	join_clear_list(char *line, t_dlst **elem, int do_join)
 	return (do_join);
 }
 
-
-
-int	gather_line(t_dlst **chks, char **ret_line)
+int	gather_line(t_dlst **chks, char **ret_line, size_t *n_chrs)
 {
 	size_t	total_len;
 	t_dlst	*elem;
@@ -126,7 +134,7 @@ int	gather_line(t_dlst **chks, char **ret_line)
 	if (!malloc_p(sizeof(char) * (total_len + 1), (void **)ret_line))
 	{
 		*n_chrs = -2;
-		return (join_clear_list(NULL, &chks, 0));
+		return (join_clear_list(NULL, chks, 0));
 	}
 	return (join_clear_list(*ret_line, &elem, 1));
 }
