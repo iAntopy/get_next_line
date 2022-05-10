@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 17:04:29 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/05 18:43:12 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/09 20:34:44 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ char	*get_next_line(int fd);
 
 const char	file1[] = "demo_files/ex1.txt";
 const char	file2[] = "demo_files/ex2.txt";
-const char	file3[] = "demo_files/ex3.txt";
+//const char	file3[] = "demo_files/ex3.txt";
+const char	file3[] = "demo_files/files/43_no_nl";
 
 static int	callsCounter[100];
 
@@ -88,6 +89,7 @@ int	main(void)
 	printf("\nStart valid tests : \n");
 	testCall(fd1);
 	testCall(fd2);
+	testCall(fd3);
 	testCall(fd1);
 	testCall(fd2);
 	testCall(fd1);
@@ -103,8 +105,10 @@ int	main(void)
 	testCall(fd3);
 	testCall(fd3);
 	testCall(fd3);
+	testCall(fd3);
+	testCall(fd3);
 
-	printf("TEST OVER ! \n");
+	printf("\n\nTEST OVER ! \n");
 	close(fd1);
 	close(fd2);
 	close(fd3);
