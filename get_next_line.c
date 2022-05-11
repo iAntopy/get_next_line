@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:14:12 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/11 15:05:40 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/11 17:11:47 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
@@ -71,7 +71,6 @@ size_t	process_buff(t_dlst **chks, const char *buff, size_t n, char **rem)
 
 int	gnl_prep(t_dlst **rems, t_dlst **fd_elem, size_t fd, size_t *n_chrs)
 {
-	*n_chrs = 0;
 	if (!(*rems)
 		&& !dlst_insert(NULL, rems, malloc(sizeof(char) * BUFFER_SIZE), 0))
 		return (0);
@@ -80,10 +79,11 @@ int	gnl_prep(t_dlst **rems, t_dlst **fd_elem, size_t fd, size_t *n_chrs)
 		*fd_elem = (*fd_elem)->next;
 	if ((*fd_elem)->next)
 	{
+		*n_chrs = -1;
 		*fd_elem = (*fd_elem)->next;
 		if ((*fd_elem)->str)
-			while ((*fd_elem)->str[*n_chrs])
-				(*rems)->str[(*n_chrs)++] = (*fd_elem)->str[*n_chrs];
+			while ((*fd_elem)->str[++(*n_chrs)])
+				(*rems)->str[*n_chrs] = (*fd_elem)->str[*n_chrs];
 		free((*fd_elem)->str);
 		(*fd_elem)->str = NULL;
 	}
@@ -92,6 +92,7 @@ int	gnl_prep(t_dlst **rems, t_dlst **fd_elem, size_t fd, size_t *n_chrs)
 		if (!dlst_insert(rems, fd_elem, NULL, 2))
 			return (0);
 		(*fd_elem)->n = fd;
+		*n_chrs = 0;
 	}
 	return (1);
 }
