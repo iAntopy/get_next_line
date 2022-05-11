@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 17:04:29 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/09 20:34:44 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/10 19:40:58 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ char	*get_next_line(int fd);
 const char	file1[] = "demo_files/ex1.txt";
 const char	file2[] = "demo_files/ex2.txt";
 //const char	file3[] = "demo_files/ex3.txt";
-const char	file3[] = "demo_files/files/43_no_nl";
+const char	file3[] = "demo_files/files/41_with_nl";
 
 static int	callsCounter[100];
 
