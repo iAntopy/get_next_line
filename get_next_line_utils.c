@@ -6,10 +6,10 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:15:10 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/10 22:21:31 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/11 16:22:52 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include "get_next_line2.h"
+#include "get_next_line.h"
 
 int	malloc_free_p(size_t size, void **ret_ptr)
 {

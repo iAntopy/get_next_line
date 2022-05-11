@@ -6,10 +6,10 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:14:12 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/10 22:12:44 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/11 16:22:16 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include "get_next_line2.h"
+#include "get_next_line.h"
 
 char	*clear_all(t_dlst **rems, t_dlst **fd_elem, t_dlst **chks)
 {
