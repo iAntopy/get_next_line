@@ -6,11 +6,12 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:15:10 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/11 16:22:23 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/11 18:43:19 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 #include "get_next_line.h"
+
+#include <stdio.h>
 
 int	malloc_free_p(size_t size, void **ret_ptr)
 {
@@ -29,24 +30,35 @@ int	malloc_free_p(size_t size, void **ret_ptr)
 	return (1);
 }
 
-int	ft_substr(const char *str, size_t start, size_t n, char **ret)
+size_t	ft_substr(const char *str, size_t start, size_t n, char **ret)
 {
 	char	*r;
 
 	if (!str)
 		return (0);
 	str += start;
-	if (!malloc_free_p(sizeof(char) * (n + 1), (void **)ret))
-		return (0);
-	r = *ret;
-	while (n--)
-		*(r++) = *(str++);
-	*r = '\0';
+	if (n == SIZE_MAX)
+	{
+		(void)n;
+		r = *ret;
+		while (*str)
+			*(r++) = *(str++);
+		return (r - *ret);
+	}
+	else
+	{
+		if (!malloc_free_p(sizeof(char) * (n + 1), (void **)ret))
+			return (0);
+		r = *ret;
+		while (n--)
+			*(r++) = *(str++);
+		*r = '\0';
+	}
 	return (1);
 }
 
-// push_app determines weither the new element is pushed behind dlst (1)
-// or appended after dlst (2). push_app = 0 only creates new initialized 
+// psh_app determines weither the new element is pushed behind dlst (1)
+// or appended after dlst (2). (0) only creates new initialized 
 // element at *elem pointer.
 int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, int psh_app)
 {
@@ -100,9 +112,7 @@ int	join_clear_list(char *line, t_dlst **elem, int do_join)
 		else
 			break ;
 	}
-	free(*elem);
-	*elem = NULL;
-	return (do_join);
+	return (malloc_free_p(do_join, (void **)elem));
 }
 
 int	gather_line(t_dlst **chks, char **ret_line, size_t *n_chrs)
