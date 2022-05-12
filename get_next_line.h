@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:10:58 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/11 19:03:22 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/11 19:55:33 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #  define BUFFER_SIZE 512
 # endif
 # ifndef SIZE_MAX
-#  define SIZE_MAX 0xffffffff
+#  define SIZE_MAX 0xffffffffffffffff
 # endif
 
 # include <stdlib.h>
