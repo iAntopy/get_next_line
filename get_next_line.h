@@ -33,13 +33,15 @@ typedef struct s_dlst
 
 char	*get_next_line(int fd);
 int		malloc_free_p(size_t n, void **ret_ptr);
-size_t	ft_substr(const char *str, size_t start, size_t n, char **ret);
+int		ft_substr(char *str, size_t start, size_t n, char **ret);
 int		dlst_insert(t_dlst **dlst, t_dlst **elem, char *mstr, int push_app);
 int		join_clear_list(char *line, t_dlst **elem, int do_join);
-int		gather_line(t_dlst **chks, char **ret_line, size_t *n_chrs);
+//int		gather_line(t_dlst **chks, char **ret_line, size_t *n_chrs);
+char	*gather_line(t_dlst **chks);
 
 enum	e_fail_codes
 {
+	E_EOF = SIZE_MAX - 2,
 	E_MLC = SIZE_MAX - 1,
 	E_IFD = SIZE_MAX
 };
