@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 17:04:29 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/03 18:46:57 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/23 23:29:39 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ char	*get_next_line(int fd);
 
 const char	file1[] = "demo_files/ex1.txt";
 const char	file2[] = "demo_files/ex2.txt";
-const char	file3[] = "demo_files/files/41_no_nl";
+const char	file3[] = "demo_files/files/nl";
 
 static int	callsCounter[100];
 
@@ -82,21 +82,21 @@ int	main(void)
 //	testCall(INT_MAX);
 	
 	printf("\nStart valid tests : \n");
-	testCall(fd1);
+//	testCall(fd1);
 //	testCall(fd2);
-	testCall(fd1);
+//	testCall(fd1);
 //	testCall(fd2);
-	testCall(fd1);
+//	testCall(fd1);
 //	testCall(fd2);
-//	testCall(fd3);
+	testCall(fd3);
 //	testCall(fd2);
-	testCall(fd1);
+//	testCall(fd1);
 //	testCall(fd2);
 //	testCall(0);
-//	testCall(fd3);
+	testCall(fd3);
 //	testCall(fd1);
-//	testCall(fd3);
-//	testCall(fd3);
+	testCall(fd3);
+	testCall(fd3);
 //	testCall(fd3);
 //	testCall(fd3);
 

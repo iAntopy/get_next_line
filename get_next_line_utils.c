@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:15:10 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/11 18:43:19 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/23 23:58:11 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
@@ -17,30 +17,32 @@ int	malloc_free_p(size_t size, void **ret_ptr)
 {
 	if (!size)
 	{
+//		printf("free : freeing ptr %p\n", *ret_ptr);
 		free(*ret_ptr);
 		*ret_ptr = NULL;
 		return (1);
 	}
 	else
 	{
+//		printf("malloc : pre  ret_ptr %p, *ret_ptr %p\n", ret_ptr, *ret_ptr);
 		*ret_ptr = malloc(size);
 		if (!(*ret_ptr))
 			return (0);
+//		printf("malloc : post ret_ptr %p, *ret_ptr %p\n", ret_ptr, *ret_ptr);
 	}
 	return (1);
 }
 
-int	ft_substr(char *str, size_t start, size_t n, char **ret)
+int	ft_substr(char *str, size_t n, char **ret, size_t *n_chrs)
 {
 	char	*r;
 	char	*s;
-	int		sub_to_end;
 
+	printf("sub : start\n");
 	if (!str)
 		return (0);
-	sub_to_end = (n == SIZE_MAX);
-	r = str + start;
-	if (sub_to_end)
+	r = str;
+	if (n == SIZE_MAX)
 		while ((++n >= 0) && *(r++))
 			continue ;
 	if (n)
@@ -48,44 +50,26 @@ int	ft_substr(char *str, size_t start, size_t n, char **ret)
 		if (!malloc_free_p(sizeof(char) * (n + 1), (void **)ret))
 			return (0);
 		r = *ret;
-		s = str + start;
+		s = str;
 		while (n--)
 			*(r++) = *(s++);
 		*r = '\0';
+		if (n_chrs)
+			*n_chrs = s - str;
 	}
-	if (sub_to_end)
+	if (n == SIZE_MAX)
 		malloc_free_p(0, (void **)&str);
 	return (1);
 }
-/*
-//		if (!malloc_free_p(sizeof(char) * (n + 1)), (void **)ret)
-//			return (0);
-		(*ret)[n] = '\0';
-		while (--n)
-			(*ret)[n] = str[n];
-		malloc_free_p(0, (void **)&str);
-	}
-	else if (n != 0)
-	{
-		if (!malloc_free_p(sizeof(char) * (n + 1), (void **)ret))
-			return (0);
-		r = *ret;
-		while (n--)
-			*(r++) = *(str++);
-		*r = '\0';
-	}
-	return (1);
-}
-*/
 
 // psh_app determines weither the new element is pushed behind dlst (1)
 // or appended after dlst (2). (0) only creates new initialized 
 // element at *elem pointer.
 int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, int psh_app)
 {
-	printf("dlst insertion \n");
+//	printf("dlst insertion \n");
 	if (!malloc_free_p(sizeof(t_dlst), (void **)elem))
-		return (0);//(malloc_free_p(0, (void **)&str));
+		return (0);
 	(*elem)->prev = NULL;
 	(*elem)->next = NULL;
 	(*elem)->str = str;
@@ -108,36 +92,38 @@ int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, int psh_app)
 	return (1);
 }
 
-int	join_clear_list(char *line, t_dlst **elem, int do_join)
+int	join_clear_list(char *line, t_dlst **elem)
 {
 	char	*s;
 
+	printf("join : start\n");
 	if (!(*elem))
-		return (do_join);
+		return (1);
 	while ((*elem)->next)
 		*elem = (*elem)->next;
 	while (1)
 	{
 		s = (*elem)->str;
-		if (do_join && s)
+		if (line && s)
 			while (*s)
 				*(line++) = *(s++);
-        malloc_free_p(0, (void **)&((*elem)->str));
+		malloc_free_p(0, (void **)&((*elem)->str));
 		if (!((*elem)->prev))
-            break ;
-        *elem = (*elem)->prev;
-        malloc_free_p(0, (void **)&((*elem)->next));
+			break ;
+		*elem = (*elem)->prev;
+		malloc_free_p(0, (void **)&((*elem)->next));
 	}
-    malloc_free_p(0, (void **)elem);
-    return (do_join);
+	malloc_free_p(0, (void **)elem);
+	return (1);
 }
 
-char	*gather_line(t_dlst **chks)//, char **ret_line)
+char	*gather_line(t_dlst **chks)
 {
 	size_t	total_len;
 	t_dlst	*elem;
 	char	*line;
 
+//	printf("gather : start\n");
 	elem = *chks;
 	if (!elem)
 		return (NULL);
@@ -148,13 +134,15 @@ char	*gather_line(t_dlst **chks)//, char **ret_line)
 		return (line);
 	}
 	total_len = elem->n;
+//	printf("gather : chunk len %zu\n", elem->n);
 	while (elem->next)
 	{
 		elem = elem->next;
 		total_len += elem->n;
+//		printf("gather : chunk len %zu\n", elem->n);
 	}
 	if (!malloc_free_p(sizeof(char) * (total_len + 1), (void **)(&line))
-		|| !join_clear_list(line, &elem, 1))//*ret_line, &elem, 1));
+		|| !join_clear_list(line, &elem))
 		return ((char *)E_MLC);
 	line[total_len] = '\0';
 	return (line);
