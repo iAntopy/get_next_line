@@ -43,8 +43,8 @@ int	ft_substr(char *str, size_t n, char **ret, size_t *n_chrs)
 		return (0);
 	r = str;
 	if (n == SIZE_MAX)
-		while ((++n >= 0) && *(r++))
-			continue ;
+		while ((++n < SIZE_MAX) && *r)
+			r++;
 	if (n)
 	{
 		if (!malloc_free_p(sizeof(char) * (n + 1), (void **)ret))
@@ -58,7 +58,10 @@ int	ft_substr(char *str, size_t n, char **ret, size_t *n_chrs)
 			*n_chrs = s - str;
 	}
 	if (n == SIZE_MAX)
+	{
+		printf("sub : freeing str at %p\n", str);
 		malloc_free_p(0, (void **)&str);
+	}
 	return (1);
 }
 
@@ -107,7 +110,10 @@ int	join_clear_list(char *line, t_dlst **elem)
 		if (line && s)
 			while (*s)
 				*(line++) = *(s++);
+		printf("join : freeing elem str at ptr %p\n", (*elem)->str);
 		malloc_free_p(0, (void **)&((*elem)->str));
+		printf("join : elem str freed : %p\n", (*elem)->str);
+
 		if (!((*elem)->prev))
 			break ;
 		*elem = (*elem)->prev;

@@ -13,19 +13,32 @@
 
 #include <stdio.h>
 
-static size_t	scan_for_nl(char *buff, size_t *idx)
+static size_t	scan_for_nl(char *buff, size_t n, size_t *idx)
 {
 	*idx = 0;
 	if (!buff)
 		return (0);
 //	printf("scan : buff ptr %p \n", buff);
-	while (buff[*idx])
+	if (n == SIZE_MAX)
 	{
-		if (buff[*idx] == '\n')
-			return (1);
-		(*idx)++;
+		while (buff[*idx])
+		{
+			if (buff[*idx] == '\n')
+				return (1);
+			(*idx)++;
+		}
+	}
+	else
+	{
+		while (n--)
+		{
+			if (buff[*idx] == '\n')
+				return (1);
+			(*idx)++;
+		}
 	}
 	return (0);
+
 }
 
 static char	*manage_eof(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t clr)
@@ -52,7 +65,7 @@ static char	*manage_eof(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t clr)
 	if ((*fd_e)->str)
 		malloc_free_p(0, (void **)&((*fd_e)->str));
 	malloc_free_p(0, (void **)fd_e);
-	printf("eof : mallocs OK\n");
+	printf("eof : frees OK\n");
 	if (!(*rems)->next)
 	{
 		printf("eof : only rems remain so clear all\n");
@@ -73,12 +86,12 @@ static char	*rec_liner(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t last)
 	printf("rec : start, is last ? %s\n", last ?"TRUE":"FALSE");
 	n_chrs = read((*fd_e)->n, (*rems)->str, BUFFER_SIZE);
 	printf("rec : n_chrs read %zu\n", n_chrs);
-	if (n_chrs == 0)
-		free((*rems)->str);
+//	if (n_chrs == 0)
+//		free((*rems)->str);
 	printf("rec : read buff ptr %p\n", (*rems)->str);
 	if (!n_chrs || n_chrs == E_IFD)
 		return (manage_eof(rems, fd_e, chks, 0));
-	nl_found = scan_for_nl((*rems)->str, &idx);
+	nl_found = scan_for_nl((*rems)->str, n_chrs, &idx);
 	idx += nl_found;
 	printf("rec : nl found (%s) idx %zu\n", nl_found?"TRUE":"FALSE", idx);
 	rm = n_chrs - idx;
@@ -114,7 +127,7 @@ static char	*gnl_prep(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t fd)
 //		printf("prep : recovered str : %s\n", (*fd_e)->str);
 	(*fd_e)->n = fd;
 	printf("prep : fd ptr %p, fd str ptr %p\n",*fd_e, (*fd_e)->str);
-	nl_found = scan_for_nl((*fd_e)->str, &idx);
+	nl_found = scan_for_nl((*fd_e)->str, SIZE_MAX, &idx);
 	idx += nl_found;
 //	printf("prep : nl found ? %s, idx %zu, reached end ? %s\n", nl_found?"TRUE":"FALSE", idx, ((*fd_e)->str && !(*fd_e)->str[idx])?"TRUE":"FALSE");
 //	if ((*fd_e)->str)
@@ -143,7 +156,6 @@ char	*get_next_line(int fd)
 	t_dlst			*fd_elem;
 	char			*line;
 	t_dlst			*chks;
-	size_t			n_chrs;
 
 	chks = NULL;
 	line = NULL;
