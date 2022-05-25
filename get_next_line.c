@@ -19,24 +19,15 @@ static size_t	scan_for_nl(char *buff, size_t n, size_t *idx)
 	if (!buff)
 		return (0);
 //	printf("scan : buff ptr %p \n", buff);
-	if (n == SIZE_MAX)
+//	if (n == SIZE_MAX)
+//	{
+	while (buff[*idx] && n--)
 	{
-		while (buff[*idx])
-		{
-			if (buff[*idx] == '\n')
-				return (1);
-			(*idx)++;
-		}
+		if (buff[*idx] == '\n')
+			return (1);
+		(*idx)++;
 	}
-	else
-	{
-		while (n--)
-		{
-			if (buff[*idx] == '\n')
-				return (1);
-			(*idx)++;
-		}
-	}
+//	}
 	return (0);
 
 }
@@ -54,23 +45,24 @@ static char	*manage_eof(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t clr)
 		return (NULL);
 	}
 	printf("eof : fd str ptr %p\n", (*fd_e)->str);
+	printf("eof : first chunk %p\n", *chks);
 	line = NULL;
 	if (chks && *chks)
-		line = gather_line(chks);
-	(*fd_e)->prev->next = (*fd_e)->next;
-	if ((*fd_e)->next)
-		(*fd_e)->next->prev = (*fd_e)->prev;
-	if (*fd_e)
-		printf("eof : fd elem exits (%p) with str %s\n", *fd_e, (*fd_e)->str);
-	if ((*fd_e)->str)
-		malloc_free_p(0, (void **)&((*fd_e)->str));
-	malloc_free_p(0, (void **)fd_e);
-	printf("eof : frees OK\n");
-	if (!(*rems)->next)
 	{
-		printf("eof : only rems remain so clear all\n");
-		printf("eof : rems prev %p, rems %p, rems next %p, rems str %p\n", (*rems)->prev, *rems, (*rems)->next, (*rems)->str);
+		printf("eof : first chk str : %s\n", (*chks)->str);
+		line = gather_line(chks);
+	}
+	printf("eof : gathered line : %s\n", line);
+	if (!(*rems)->next || !(*rems)->next->next)
 		join_clear_list(NULL, rems);
+	else
+	{
+		(*fd_e)->prev->next = (*fd_e)->next;
+		if ((*fd_e)->next)
+			(*fd_e)->next->prev = (*fd_e)->prev;
+		malloc_free_p(0, (void **)&((*fd_e)->str));
+		malloc_free_p(0, (void **)fd_e);
+		printf("eof : frees OK\n");
 	}
 	return (line);
 }
@@ -85,7 +77,7 @@ static char	*rec_liner(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t last)
 
 	printf("rec : start, is last ? %s\n", last ?"TRUE":"FALSE");
 	n_chrs = read((*fd_e)->n, (*rems)->str, BUFFER_SIZE);
-	printf("rec : n_chrs read %zu\n", n_chrs);
+	printf("rec : n_chrs read %Iu\n", n_chrs);
 //	if (n_chrs == 0)
 //		free((*rems)->str);
 	printf("rec : read buff ptr %p\n", (*rems)->str);
@@ -93,9 +85,9 @@ static char	*rec_liner(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t last)
 		return (manage_eof(rems, fd_e, chks, 0));
 	nl_found = scan_for_nl((*rems)->str, n_chrs, &idx);
 	idx += nl_found;
-	printf("rec : nl found (%s) idx %zu\n", nl_found?"TRUE":"FALSE", idx);
+	printf("rec : nl found (%s) idx %Iu\n", nl_found?"TRUE":"FALSE", idx);
 	rm = n_chrs - idx;
-	printf("rec : rm %zu\n", rm);
+	printf("rec : rm %Iu\n", rm);
 	elem = *chks;
 	if ((last && !ft_substr((*rems)->str, n_chrs, &((*fd_e)->str), NULL))
 		|| (!last && !dlst_insert(chks, &elem, NULL, 1))
@@ -103,7 +95,7 @@ static char	*rec_liner(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t last)
 		|| (!last && !ft_substr((*rems)->str + idx, rm, &((*fd_e)->str), NULL)))
 		return (manage_eof(rems, fd_e, chks, E_MLC));
 	*chks = elem;
-	printf("rec : pushed chunk len %zu\n", elem->n);
+	printf("rec : pushed chunk len %Iu\n", elem->n);
 	if (last || (nl_found && rm))
 		return (gather_line(chks));
 	return (rec_liner(rems, fd_e, chks, nl_found));
@@ -129,7 +121,7 @@ static char	*gnl_prep(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t fd)
 	printf("prep : fd ptr %p, fd str ptr %p\n",*fd_e, (*fd_e)->str);
 	nl_found = scan_for_nl((*fd_e)->str, SIZE_MAX, &idx);
 	idx += nl_found;
-//	printf("prep : nl found ? %s, idx %zu, reached end ? %s\n", nl_found?"TRUE":"FALSE", idx, ((*fd_e)->str && !(*fd_e)->str[idx])?"TRUE":"FALSE");
+//	printf("prep : nl found ? %s, idx %Iu, reached end ? %s\n", nl_found?"TRUE":"FALSE", idx, ((*fd_e)->str && !(*fd_e)->str[idx])?"TRUE":"FALSE");
 //	if ((*fd_e)->str)
 //		printf("prep : char at idx %c\n", (*fd_e)->str[idx]);
 	if (!(*fd_e)->str || !nl_found || (nl_found && (*fd_e)->str[idx] == '\0'))

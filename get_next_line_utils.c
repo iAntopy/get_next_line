@@ -15,14 +15,13 @@
 
 int	malloc_free_p(size_t size, void **ret_ptr)
 {
-	if (!size)
+	if (!size && ret_ptr && *ret_ptr)
 	{
-//		printf("free : freeing ptr %p\n", *ret_ptr);
+		printf("free : freeing ptr %p\n", *ret_ptr);
 		free(*ret_ptr);
 		*ret_ptr = NULL;
-		return (1);
 	}
-	else
+	else if (size > 1)
 	{
 //		printf("malloc : pre  ret_ptr %p, *ret_ptr %p\n", ret_ptr, *ret_ptr);
 		*ret_ptr = malloc(size);
@@ -37,12 +36,13 @@ int	ft_substr(char *str, size_t n, char **ret, size_t *n_chrs)
 {
 	char	*r;
 	char	*s;
+	int	to_end;
 
-	printf("sub : start\n");
+	to_end = (n == SIZE_MAX);
 	if (!str)
 		return (0);
 	r = str;
-	if (n == SIZE_MAX)
+	if (to_end)
 		while ((++n < SIZE_MAX) && *r)
 			r++;
 	if (n)
@@ -53,15 +53,11 @@ int	ft_substr(char *str, size_t n, char **ret, size_t *n_chrs)
 		s = str;
 		while (n--)
 			*(r++) = *(s++);
-		*r = '\0';
 		if (n_chrs)
 			*n_chrs = s - str;
 	}
-	if (n == SIZE_MAX)
-	{
-		printf("sub : freeing str at %p\n", str);
-		malloc_free_p(0, (void **)&str);
-	}
+//	if (to_end)
+	malloc_free_p(!to_end, (void **)&str);
 	return (1);
 }
 
@@ -70,7 +66,7 @@ int	ft_substr(char *str, size_t n, char **ret, size_t *n_chrs)
 // element at *elem pointer.
 int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, int psh_app)
 {
-//	printf("dlst insertion \n");
+	printf("dlst insertion \n");
 	if (!malloc_free_p(sizeof(t_dlst), (void **)elem))
 		return (0);
 	(*elem)->prev = NULL;
@@ -99,7 +95,7 @@ int	join_clear_list(char *line, t_dlst **elem)
 {
 	char	*s;
 
-	printf("join : start\n");
+//	printf("join : start\n");
 	if (!(*elem))
 		return (1);
 	while ((*elem)->next)
@@ -110,9 +106,9 @@ int	join_clear_list(char *line, t_dlst **elem)
 		if (line && s)
 			while (*s)
 				*(line++) = *(s++);
-		printf("join : freeing elem str at ptr %p\n", (*elem)->str);
+//		printf("join : freeing elem str at ptr %p\n", (*elem)->str);
 		malloc_free_p(0, (void **)&((*elem)->str));
-		printf("join : elem str freed : %p\n", (*elem)->str);
+//		printf("join : elem str freed : %p\n", (*elem)->str);
 
 		if (!((*elem)->prev))
 			break ;
@@ -136,16 +132,17 @@ char	*gather_line(t_dlst **chks)
 	if (!(elem->next))
 	{
 		line = elem->str;
+//		printf("gather : returning line from single chunk, line : %s\n", line);
 		malloc_free_p(0, (void **)chks);
 		return (line);
 	}
 	total_len = elem->n;
-//	printf("gather : chunk len %zu\n", elem->n);
+//	printf("gather : chunk len %Iu\n", elem->n);
 	while (elem->next)
 	{
 		elem = elem->next;
 		total_len += elem->n;
-//		printf("gather : chunk len %zu\n", elem->n);
+//		printf("gather : chunk len %Iu\n", elem->n);
 	}
 	if (!malloc_free_p(sizeof(char) * (total_len + 1), (void **)(&line))
 		|| !join_clear_list(line, &elem))
