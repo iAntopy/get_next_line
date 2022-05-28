@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:15:10 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/23 23:58:11 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/28 18:15:28 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
@@ -17,12 +17,13 @@ int	malloc_free_p(size_t size, void **ret_ptr)
 {
 	if (!size && ret_ptr && *ret_ptr)
 	{
-		printf("free : freeing ptr %p\n", *ret_ptr);
+//		printf("free : freeing ptr %p\n", *ret_ptr);
 		free(*ret_ptr);
 		*ret_ptr = NULL;
 	}
-	else if (size > 1)
+	else if (size > 0)
 	{
+//		printf("malloc : size %zu\n", size);
 //		printf("malloc : pre  ret_ptr %p, *ret_ptr %p\n", ret_ptr, *ret_ptr);
 		*ret_ptr = malloc(size);
 		if (!(*ret_ptr))
@@ -32,61 +33,71 @@ int	malloc_free_p(size_t size, void **ret_ptr)
 	return (1);
 }
 
-int	ft_substr(char *str, size_t n, char **ret, size_t *n_chrs)
+int	ft_substr(char *str, size_t start, size_t n, char **ret)//, void *ptr)//size_t *n_chrs)
 {
 	char	*r;
 	char	*s;
 	int	to_end;
 
+//	printf("sub : subbing %zu chars of str %p, at ptr %p\n", n, str, *ret);
 	to_end = (n == SIZE_MAX);
 	if (!str)
 		return (0);
-	r = str;
+	r = str + start;
 	if (to_end)
+	{
+//		printf("sub : sub to end\n");
 		while ((++n < SIZE_MAX) && *r)
 			r++;
+	}
 	if (n)
 	{
+//		printf("sub : mallocing %zu bytes\n", n + 1);
 		if (!malloc_free_p(sizeof(char) * (n + 1), (void **)ret))
 			return (0);
 		r = *ret;
-		s = str;
+		s = str + start;
 		while (n--)
 			*(r++) = *(s++);
-		if (n_chrs)
-			*n_chrs = s - str;
+		*r = '\0';
 	}
-//	if (to_end)
-	malloc_free_p(!to_end, (void **)&str);
+	if (to_end)
+	{
+//		printf("sub : freeing ptr %p\n", str);
+		malloc_free_p(0, (void **)&str);
+//		printf("sub : freeing over\n");
+	}
 	return (1);
 }
 
 // psh_app determines weither the new element is pushed behind dlst (1)
 // or appended after dlst (2). (0) only creates new initialized 
 // element at *elem pointer.
-int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, int psh_app)
+int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, size_t psh_app)
 {
-	printf("dlst insertion \n");
+//	printf("dlst insertion, psh_app : %zu\n", psh_app);
 	if (!malloc_free_p(sizeof(t_dlst), (void **)elem))
 		return (0);
 	(*elem)->prev = NULL;
 	(*elem)->next = NULL;
 	(*elem)->str = str;
-	if (dlst && *dlst && psh_app == 1)
-	{
-		if ((*dlst)->prev)
-			(*dlst)->prev->next = *elem;
-		(*elem)->prev = (*dlst)->prev;
-		(*dlst)->prev = *elem;
-		(*elem)->next = *dlst;
-	}
-	else if (dlst && *dlst && psh_app == 2)
+	(*elem)->n = psh_app;
+	if (dlst && *dlst && psh_app == SIZE_MAX)
 	{
 		if ((*dlst)->next)
 			(*dlst)->next->prev = *elem;
 		(*elem)->next = (*dlst)->next;
 		(*dlst)->next = *elem;
 		(*elem)->prev = (*dlst);
+	}
+	else if (dlst && *dlst && psh_app > 0)
+	{
+//		printf("insert : pushing chunk of len %zu\n", psh_app);
+		if ((*dlst)->prev)
+			(*dlst)->prev->next = *elem;
+		(*elem)->prev = (*dlst)->prev;
+		(*dlst)->prev = *elem;
+		(*elem)->next = *dlst;
 	}
 	return (1);
 }
@@ -137,12 +148,12 @@ char	*gather_line(t_dlst **chks)
 		return (line);
 	}
 	total_len = elem->n;
-//	printf("gather : chunk len %Iu\n", elem->n);
+//	printf("gather : chunk len %zu\n", elem->n);
 	while (elem->next)
 	{
 		elem = elem->next;
 		total_len += elem->n;
-//		printf("gather : chunk len %Iu\n", elem->n);
+//		printf("gather : chunk len %zu\n", elem->n);
 	}
 	if (!malloc_free_p(sizeof(char) * (total_len + 1), (void **)(&line))
 		|| !join_clear_list(line, &elem))

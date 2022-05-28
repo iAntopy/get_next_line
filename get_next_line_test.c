@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 17:04:29 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/23 23:29:39 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/28 17:20:54 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ char	*get_next_line(int fd);
 
 const char	file1[] = "demo_files/ex1.txt";
 const char	file2[] = "demo_files/ex2.txt";
-const char	file3[] = "demo_files/files/nl";
+const char	file3[] = "demo_files/files/42_with_nl";
 
 static int	callsCounter[100];
 
@@ -36,7 +36,7 @@ void	printnl(char *str)
 		while (*str)
 		{
 			if (*str == '\n')
-				write(1, "$", 2);
+				write(1, "$", 1);
 			write(1, str++, 1);
 		}
 		write(1, ">", 1);
@@ -76,10 +76,10 @@ int	main(void)
 	}
 	printf("TEST START !\n");
 
-//	printf("Invalid fds tests: \n");
-//	testCall(-1);
-//	testCall(10);
-//	testCall(INT_MAX);
+	printf("Invalid fds tests: \n");
+	testCall(-1);
+	testCall(10);
+	testCall(INT_MAX);
 	
 	printf("\nStart valid tests : \n");
 //	testCall(fd1);
