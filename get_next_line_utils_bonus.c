@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:15:10 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/11 18:43:19 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/28 18:46:43 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
@@ -15,13 +15,12 @@
 
 int	malloc_free_p(size_t size, void **ret_ptr)
 {
-	if (size < 2)
+	if (!size && ret_ptr && *ret_ptr)
 	{
 		free(*ret_ptr);
 		*ret_ptr = NULL;
-		return (size);
 	}
-	else
+	else if (size > 0)
 	{
 		*ret_ptr = malloc(size);
 		if (!(*ret_ptr))
@@ -30,55 +29,46 @@ int	malloc_free_p(size_t size, void **ret_ptr)
 	return (1);
 }
 
-size_t	ft_substr(const char *str, size_t start, size_t n, char **ret)
+int	ft_substr(char *str, size_t start, size_t n, char **ret)
 {
 	char	*r;
+	char	*s;
+	int		to_end;
 
+	to_end = (n == SIZE_MAX);
 	if (!str)
 		return (0);
-	str += start;
-	if (n == SIZE_MAX)
-	{
-		(void)n;
-		r = *ret;
-		while (*str)
-			*(r++) = *(str++);
-		return (r - *ret);
-	}
-	else
+	r = str + start;
+	if (to_end)
+		while ((++n < SIZE_MAX) && *r)
+			r++;
+	if (n)
 	{
 		if (!malloc_free_p(sizeof(char) * (n + 1), (void **)ret))
 			return (0);
 		r = *ret;
+		s = str + start;
 		while (n--)
-			*(r++) = *(str++);
+			*(r++) = *(s++);
 		*r = '\0';
 	}
+	if (to_end)
+		malloc_free_p(0, (void **)&str);
 	return (1);
 }
 
 // psh_app determines weither the new element is pushed behind dlst (1)
 // or appended after dlst (2). (0) only creates new initialized 
 // element at *elem pointer.
-int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, int psh_app)
+int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, size_t psh_app)
 {
-	if ((psh_app != 2 && !str) || !malloc_free_p(sizeof(t_dlst), (void **)elem))
-		return (malloc_free_p(0, (void **)&str));
+	if (!malloc_free_p(sizeof(t_dlst), (void **)elem))
+		return (0);
 	(*elem)->prev = NULL;
 	(*elem)->next = NULL;
 	(*elem)->str = str;
-	if (dlst && psh_app == 1)
-	{
-		if (*dlst)
-		{
-			if ((*dlst)->prev)
-				(*dlst)->prev->next = *elem;
-			(*elem)->prev = (*dlst)->prev;
-			(*dlst)->prev = *elem;
-			(*elem)->next = *dlst;
-		}
-	}
-	else if (dlst && psh_app == 2)
+	(*elem)->n = psh_app;
+	if (dlst && *dlst && psh_app == SIZE_MAX)
 	{
 		if ((*dlst)->next)
 			(*dlst)->next->prev = *elem;
@@ -86,47 +76,55 @@ int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, int psh_app)
 		(*dlst)->next = *elem;
 		(*elem)->prev = (*dlst);
 	}
+	else if (dlst && *dlst && psh_app > 0)
+	{
+		if ((*dlst)->prev)
+			(*dlst)->prev->next = *elem;
+		(*elem)->prev = (*dlst)->prev;
+		(*dlst)->prev = *elem;
+		(*elem)->next = *dlst;
+	}
 	return (1);
 }
 
-int	join_clear_list(char *line, t_dlst **elem, int do_join)
+int	join_clear_list(char *line, t_dlst **elem)
 {
 	char	*s;
 
 	if (!(*elem))
-		return (do_join);
+		return (1);
 	while ((*elem)->next)
 		*elem = (*elem)->next;
 	while (1)
 	{
 		s = (*elem)->str;
-		if (do_join && s)
+		if (line && s)
 			while (*s)
 				*(line++) = *(s++);
-		free((*elem)->str);
-		if ((*elem)->prev)
-		{
-			*elem = (*elem)->prev;
-			free((*elem)->next);
-		}
-		else
+		malloc_free_p(0, (void **)&((*elem)->str));
+		if (!((*elem)->prev))
 			break ;
+		*elem = (*elem)->prev;
+		malloc_free_p(0, (void **)&((*elem)->next));
 	}
-	return (malloc_free_p(do_join, (void **)elem));
+	malloc_free_p(0, (void **)elem);
+	return (1);
 }
 
-int	gather_line(t_dlst **chks, char **ret_line, size_t *n_chrs)
+char	*gather_line(t_dlst **chks)
 {
 	size_t	total_len;
 	t_dlst	*elem;
+	char	*line;
 
 	elem = *chks;
 	if (!elem)
-		return (0);
+		return (NULL);
 	if (!(elem->next))
 	{
-		*ret_line = elem->str;
-		return (malloc_free_p(1, (void **)chks));
+		line = elem->str;
+		malloc_free_p(0, (void **)chks);
+		return (line);
 	}
 	total_len = elem->n;
 	while (elem->next)
@@ -134,11 +132,9 @@ int	gather_line(t_dlst **chks, char **ret_line, size_t *n_chrs)
 		elem = elem->next;
 		total_len += elem->n;
 	}
-	if (!malloc_free_p(sizeof(char) * (total_len + 1), (void **)ret_line))
-	{
-		*n_chrs = E_MLC;
-		return (join_clear_list(NULL, chks, 0));
-	}
-	(*ret_line)[total_len] = '\0';
-	return (join_clear_list(*ret_line, &elem, 1));
+	if (!malloc_free_p(sizeof(char) * (total_len + 1), (void **)(&line))
+		|| !join_clear_list(line, &elem))
+		return ((char *)E_MLC);
+	line[total_len] = '\0';
+	return (line);
 }

@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/18 17:04:29 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/28 17:20:54 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/28 19:18:05 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ char	*get_next_line(int fd);
 
 const char	file1[] = "demo_files/ex1.txt";
 const char	file2[] = "demo_files/ex2.txt";
-const char	file3[] = "demo_files/files/42_with_nl";
+const char	file3[] = "demo_files/test123";
 
 static int	callsCounter[100];
 
@@ -97,8 +97,10 @@ int	main(void)
 //	testCall(fd1);
 	testCall(fd3);
 	testCall(fd3);
-//	testCall(fd3);
-//	testCall(fd3);
+	testCall(fd3);
+	testCall(fd3);
+	testCall(fd3);
+	testCall(fd3);
 
 	printf("TEST OVER ! \n");
 	close(fd1);
