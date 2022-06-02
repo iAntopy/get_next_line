@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:14:12 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/28 23:32:57 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/06/02 15:53:21 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
@@ -66,6 +66,7 @@ static char	*rec_liner(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t last)
 	nl_found = scan_for_nl((*rems)->str, n_chrs, &idx);
 	idx += nl_found;
 	rm = n_chrs - idx;
+	elem = *chks;
 	if ((last && !ft_substr((*rems)->str, 0, n_chrs, &((*fd_e)->str)))
 		|| (!last && !dlst_insert(chks, &elem, NULL, idx))
 		|| (!last && !ft_substr((*rems)->str, 0, idx, &(elem->str)))

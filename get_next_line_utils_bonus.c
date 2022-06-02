@@ -6,12 +6,10 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:15:10 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/28 18:46:43 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/28 23:32:49 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
-
-#include <stdio.h>
 
 int	malloc_free_p(size_t size, void **ret_ptr)
 {
@@ -57,9 +55,10 @@ int	ft_substr(char *str, size_t start, size_t n, char **ret)
 	return (1);
 }
 
-// psh_app determines weither the new element is pushed behind dlst (1)
-// or appended after dlst (2). (0) only creates new initialized 
-// element at *elem pointer.
+// psh_app determines weither the new element is pushed behind dlst
+// (psh_app >= 1) or appended after dlst (SIZE_MAX). (0) only creates 
+// new initialized element at *elem pointer. When text chunks are
+// inserted in the list the psh_app value will represent the chunk len.
 int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, size_t psh_app)
 {
 	if (!malloc_free_p(sizeof(t_dlst), (void **)elem))
@@ -76,7 +75,7 @@ int	dlst_insert(t_dlst **dlst, t_dlst **elem, char *str, size_t psh_app)
 		(*dlst)->next = *elem;
 		(*elem)->prev = (*dlst);
 	}
-	else if (dlst && *dlst && psh_app > 0)
+	else if (dlst && *dlst && psh_app >= 1)
 	{
 		if ((*dlst)->prev)
 			(*dlst)->prev->next = *elem;

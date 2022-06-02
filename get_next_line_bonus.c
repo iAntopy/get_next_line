@@ -6,7 +6,7 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:14:12 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/28 18:44:29 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/05/31 21:06:06 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
@@ -96,10 +96,8 @@ static char	*gnl_prep(t_dlst **rems, t_dlst **fd_e, t_dlst **chks, size_t fd)
 	idx += nl_found;
 	if (!(*fd_e)->str || !nl_found || (nl_found && (*fd_e)->str[idx] == '\0'))
 	{
-		if ((*fd_e)->str && !dlst_insert(NULL, chks, (*fd_e)->str, 0))
+		if ((*fd_e)->str && !dlst_insert(NULL, chks, (*fd_e)->str, idx))
 			return (manage_eof(rems, fd_e, chks, E_MLC));
-		if (*chks)
-			(*chks)->n = idx;
 		(*fd_e)->str = NULL;
 		return (rec_liner(rems, fd_e, chks, nl_found));
 	}
