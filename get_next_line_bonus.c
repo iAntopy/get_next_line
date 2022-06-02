@@ -6,12 +6,10 @@
 /*   By: iamongeo <marvin@42quebec.com>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/04 15:14:12 by iamongeo          #+#    #+#             */
-/*   Updated: 2022/05/31 21:06:06 by iamongeo         ###   ########.fr       */
+/*   Updated: 2022/06/02 15:53:21 by iamongeo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "get_next_line.h"
-
-#include <stdio.h>
 
 static size_t	scan_for_nl(char *buff, size_t n, size_t *idx)
 {
